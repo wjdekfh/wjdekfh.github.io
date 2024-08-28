@@ -10,6 +10,10 @@
 
 require('dotenv').config();
 
+const getDate = (slug) => {
+  return slug.substring(1, 11);
+};
+
 module.exports = {
   siteMetadata: {
     title: `Gatsby Starter Blog`,
@@ -87,32 +91,34 @@ module.exports = {
           {
             serialize: ({ query: { site, allMarkdownRemark } }) => {
               return allMarkdownRemark.nodes.map(node => {
-                return Object.assign({}, node.frontmatter, {
+                return {
+                  title: node.frontmatter.title,
                   description: node.excerpt,
-                  date: node.frontmatter.date,
+                  date: getDate(node.fields.slug),
                   url: site.siteMetadata.siteUrl + node.fields.slug,
                   guid: site.siteMetadata.siteUrl + node.fields.slug,
-                  custom_elements: [{ "content:encoded": node.html }],
-                })
+                }
               })
             },
             query: `{
-              allMarkdownRemark(sort: {frontmatter: {date: DESC}}) {
+              allMarkdownRemark(
+                sort: { fields: {slug: DESC} }
+                limit: 15
+              ) {
                 nodes {
                   excerpt
-                  html
                   fields {
                     slug
                   }
                   frontmatter {
                     title
-                    date
                   }
                 }
               }
             }`,
-            output: "/rss.xml",
-            title: "Gatsby Starter Blog RSS Feed",
+            output: "/feed.xml",
+            title: "사람인 기술 블로그",
+            description: "Saramin Tech Blog / 사람인 기술 블로그"
           },
         ],
       },
